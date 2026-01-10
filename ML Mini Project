@@ -1,0 +1,432 @@
+**Classification Assignment Mini Project**
+
+📌 Problem Statement
+
+Build and evaluate multiple classification models to predict whether a patient has diabetes based on diagnostic measurements. You will use the Pima Indians Diabetes Dataset, which contains medical data for female patients of Pima Indian heritage.
+
+📂 Dataset
+
+• Name: Pima Indians Diabetes Dataset
+
+• Source: UCI Machine Learning Repository
+
+Group Members :
+Rugved Madankar(24070521250)
+Aryan Raut(24070521264)
+Parth Vishnu(24070521279)
+"""
+
+import pandas as pd
+
+# Load the dataset from the URL
+df = pd.read_csv('diabetes.csv')
+
+# Display the first 5 rows of the DataFrame
+print("First 5 rows of the DataFrame:")
+print(df.head())
+
+# Print the shape of the DataFrame
+print("\nShape of the DataFrame:")
+print(df.shape)
+
+# Generate descriptive statistics of the DataFrame
+print("\nDescriptive statistics of the DataFrame:")
+print(df.describe())
+
+columns_with_zeros_as_missing = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
+
+for col in columns_with_zeros_as_missing:
+    # Calculate the median of the column, excluding zero values
+    median_val = df[df[col] != 0][col].median()
+    # Replace zero values with the calculated median
+    df[col] = df[col].replace(0, median_val)
+
+print("Zero values replaced with median in specified columns.")
+
+# Display descriptive statistics after handling missing values
+print("\nDescriptive statistics after handling missing values:")
+print(df.describe())
+
+from sklearn.preprocessing import StandardScaler
+
+# Separate features (X) and target variable (y)
+X = df.drop('Outcome', axis=1)
+y = df['Outcome']
+
+# Initialize the StandardScaler
+scaler = StandardScaler()
+
+# Fit the scaler to the features and transform them
+X_scaled = scaler.fit_transform(X)
+
+# Convert the scaled features back into a DataFrame
+X = pd.DataFrame(X_scaled, columns=X.columns)
+
+print("Features scaled successfully using StandardScaler.")
+print("First 5 rows of scaled features (X):")
+print(X.head())
+print("Shape of scaled features (X):")
+print(X.shape)
+
+from sklearn.model_selection import train_test_split
+
+# Split the dataset into training and testing sets (80/20 ratio)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+print("Data split into training and testing sets.")
+
+# Verify the shapes of the resulting sets
+print("\nShape of X_train:", X_train.shape)
+print("Shape of X_test:", X_test.shape)
+print("Shape of y_train:", y_train.shape)
+print("Shape of y_test:", y_test.shape)
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, RocCurveDisplay
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Initialize the Logistic Regression model
+log_reg_model = LogisticRegression(solver='liblinear', random_state=42)
+
+# Train the model
+log_reg_model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred_log_reg = log_reg_model.predict(X_test)
+y_pred_proba_log_reg = log_reg_model.predict_proba(X_test)[:, 1]
+
+# Calculate evaluation metrics
+accuracy_log_reg = accuracy_score(y_test, y_pred_log_reg)
+precision_log_reg = precision_score(y_test, y_pred_log_reg)
+recall_log_reg = recall_score(y_test, y_pred_log_reg)
+f1_log_reg = f1_score(y_test, y_pred_log_reg)
+conf_matrix_log_reg = confusion_matrix(y_test, y_pred_log_reg)
+
+print("Logistic Regression Model Performance:")
+print(f"Accuracy: {accuracy_log_reg:.4f}")
+print(f"Precision: {precision_log_reg:.4f}")
+print(f"Recall: {recall_log_reg:.4f}")
+print(f"F1-Score: {f1_log_reg:.4f}")
+print("Confusion Matrix:")
+print(conf_matrix_log_reg)
+
+# Plot Confusion Matrix
+plt.figure(figsize=(6, 4))
+sns.heatmap(conf_matrix_log_reg, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['No Diabetes', 'Diabetes'], yticklabels=['No Diabetes', 'Diabetes'])
+plt.title('Logistic Regression Confusion Matrix')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# Perform 5-fold cross-validation
+cv_scores_log_reg = cross_val_score(log_reg_model, X_train, y_train, cv=5)
+print(f"\nCross-validation mean accuracy: {cv_scores_log_reg.mean():.4f}")
+
+# Plot ROC curve
+plt.figure(figsize=(8, 6))
+roc_display_log_reg = RocCurveDisplay.from_estimator(log_reg_model, X_test, y_test)
+roc_display_log_reg.plot()
+plt.title('Logistic Regression ROC Curve')
+plt.show()
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, RocCurveDisplay
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Initialize the Decision Tree Classifier model
+dt_model = DecisionTreeClassifier(random_state=42)
+
+# Train the model
+dt_model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred_dt = dt_model.predict(X_test)
+y_pred_proba_dt = dt_model.predict_proba(X_test)[:, 1]
+
+# Calculate evaluation metrics
+accuracy_dt = accuracy_score(y_test, y_pred_dt)
+precision_dt = precision_score(y_test, y_pred_dt)
+recall_dt = recall_score(y_test, y_pred_dt)
+f1_dt = f1_score(y_test, y_pred_dt)
+conf_matrix_dt = confusion_matrix(y_test, y_pred_dt)
+
+print("Decision Tree Classifier Model Performance:")
+print(f"Accuracy: {accuracy_dt:.4f}")
+print(f"Precision: {precision_dt:.4f}")
+print(f"Recall: {recall_dt:.4f}")
+print(f"F1-Score: {f1_dt:.4f}")
+print("Confusion Matrix:")
+print(conf_matrix_dt)
+
+# Plot Confusion Matrix
+plt.figure(figsize=(6, 4))
+sns.heatmap(conf_matrix_dt, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['No Diabetes', 'Diabetes'], yticklabels=['No Diabetes', 'Diabetes'])
+plt.title('Decision Tree Confusion Matrix')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# Perform 5-fold cross-validation
+cv_scores_dt = cross_val_score(dt_model, X_train, y_train, cv=5)
+print(f"\nCross-validation mean accuracy: {cv_scores_dt.mean():.4f}")
+
+# Plot ROC curve
+plt.figure(figsize=(8, 6))
+roc_display_dt = RocCurveDisplay.from_estimator(dt_model, X_test, y_test)
+roc_display_dt.plot()
+plt.title('Decision Tree ROC Curve')
+plt.show()
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, RocCurveDisplay
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Initialize the Random Forest Classifier model
+rf_model = RandomForestClassifier(random_state=42)
+
+# Train the model
+rf_model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred_rf = rf_model.predict(X_test)
+y_pred_proba_rf = rf_model.predict_proba(X_test)[:, 1]
+
+# Calculate evaluation metrics
+accuracy_rf = accuracy_score(y_test, y_pred_rf)
+precision_rf = precision_score(y_test, y_pred_rf)
+recall_rf = recall_score(y_test, y_pred_rf)
+f1_rf = f1_score(y_test, y_pred_rf)
+conf_matrix_rf = confusion_matrix(y_test, y_pred_rf)
+
+print("Random Forest Classifier Model Performance:")
+print(f"Accuracy: {accuracy_rf:.4f}")
+print(f"Precision: {precision_rf:.4f}")
+print(f"Recall: {recall_rf:.4f}")
+print(f"F1-Score: {f1_rf:.4f}")
+print("Confusion Matrix:")
+print(conf_matrix_rf)
+
+# Plot Confusion Matrix
+plt.figure(figsize=(6, 4))
+sns.heatmap(conf_matrix_rf, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['No Diabetes', 'Diabetes'], yticklabels=['No Diabetes', 'Diabetes'])
+plt.title('Random Forest Confusion Matrix')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# Perform 5-fold cross-validation
+cv_scores_rf = cross_val_score(rf_model, X_train, y_train, cv=5)
+print(f"\nCross-validation mean accuracy: {cv_scores_rf.mean():.4f}")
+
+# Plot ROC curve
+plt.figure(figsize=(8, 6))
+roc_display_rf = RocCurveDisplay.from_estimator(rf_model, X_test, y_test)
+roc_display_rf.plot()
+plt.title('Random Forest ROC Curve')
+plt.show()
+
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, RocCurveDisplay
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Initialize the Support Vector Machine (SVC) model with probability estimates
+svm_model = SVC(probability=True, random_state=42)
+
+# Train the model
+svm_model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred_svc = svm_model.predict(X_test)
+y_pred_proba_svc = svm_model.predict_proba(X_test)[:, 1]
+
+# Calculate evaluation metrics
+accuracy_svc = accuracy_score(y_test, y_pred_svc)
+precision_svc = precision_score(y_test, y_pred_svc)
+recall_svc = recall_score(y_test, y_pred_svc)
+f1_svc = f1_score(y_test, y_pred_svc)
+conf_matrix_svc = confusion_matrix(y_test, y_pred_svc)
+
+print("Support Vector Machine Model Performance:")
+print(f"Accuracy: {accuracy_svc:.4f}")
+print(f"Precision: {precision_svc:.4f}")
+print(f"Recall: {recall_svc:.4f}")
+print(f"F1-Score: {f1_svc:.4f}")
+print("Confusion Matrix:")
+print(conf_matrix_svc)
+
+# Plot Confusion Matrix
+plt.figure(figsize=(6, 4))
+sns.heatmap(conf_matrix_svc, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=['No Diabetes', 'Diabetes'], yticklabels=['No Diabetes', 'Diabetes'])
+plt.title('Support Vector Machine Confusion Matrix')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.show()
+
+# Perform 5-fold cross-validation
+cv_scores_svc = cross_val_score(svm_model, X_train, y_train, cv=5)
+print(f"\nCross-validation mean accuracy: {cv_scores_svc.mean():.4f}")
+
+# Plot ROC curve
+plt.figure(figsize=(8, 6))
+roc_display_svc = RocCurveDisplay.from_estimator(svm_model, X_test, y_test)
+roc_display_svc.plot()
+plt.title('Support Vector Machine ROC Curve')
+plt.show()
+
+from sklearn.metrics import roc_auc_score
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import RocCurveDisplay
+
+# Calculate AUC scores for each model
+auc_log_reg = roc_auc_score(y_test, log_reg_model.predict_proba(X_test)[:, 1])
+auc_dt = roc_auc_score(y_test, dt_model.predict_proba(X_test)[:, 1])
+auc_rf = roc_auc_score(y_test, rf_model.predict_proba(X_test)[:, 1])
+auc_svc = roc_auc_score(y_test, svm_model.predict_proba(X_test)[:, 1])
+
+# Create a dictionary to store the metrics
+results = {
+    'Logistic Regression': {
+        'Accuracy': accuracy_log_reg,
+        'Precision': precision_log_reg,
+        'Recall': recall_log_reg,
+        'F1-Score': f1_log_reg,
+        'CV Mean Accuracy': cv_scores_log_reg.mean(),
+        'AUC': auc_log_reg
+    },
+    'Decision Tree': {
+        'Accuracy': accuracy_dt,
+        'Precision': precision_dt,
+        'Recall': recall_dt,
+        'F1-Score': f1_dt,
+        'CV Mean Accuracy': cv_scores_dt.mean(),
+        'AUC': auc_dt
+    },
+    'Random Forest': {
+        'Accuracy': accuracy_rf,
+        'Precision': precision_rf,
+        'Recall': recall_rf,
+        'F1-Score': f1_rf,
+        'CV Mean Accuracy': cv_scores_rf.mean(),
+        'AUC': auc_rf
+    },
+    'Support Vector Machine': {
+        'Accuracy': accuracy_svc,
+        'Precision': precision_svc,
+        'Recall': recall_svc,
+        'F1-Score': f1_svc,
+        'CV Mean Accuracy': cv_scores_svc.mean(),
+        'AUC': auc_svc
+    }
+}
+
+# Convert the dictionary to a pandas DataFrame
+results_df = pd.DataFrame(results).T
+
+print("Comparative Table of Model Performance:")
+print(results_df)
+
+# Plot bar chart for Accuracy and Cross-Validation Mean Accuracy
+results_df[['Accuracy', 'CV Mean Accuracy']].plot(kind='bar', figsize=(10, 6))
+plt.title('Model Accuracy Comparison')
+plt.ylabel('Score')
+plt.xticks(rotation=45)
+plt.legend(loc='lower right')
+plt.tight_layout()
+plt.show()
+
+# Plot bar chart for Precision, Recall, and F1-Score
+results_df[['Precision', 'Recall', 'F1-Score']].plot(kind='bar', figsize=(10, 6))
+plt.title('Model Precision, Recall, and F1-Score Comparison')
+plt.ylabel('Score')
+plt.xticks(rotation=45)
+plt.legend(loc='lower right')
+plt.tight_layout()
+plt.show()
+
+# Plot ROC curves for all models on a single graph
+plt.figure(figsize=(10, 8))
+roc_display_log_reg = RocCurveDisplay.from_estimator(log_reg_model, X_test, y_test, name='Logistic Regression', ax=plt.gca())
+roc_display_dt = RocCurveDisplay.from_estimator(dt_model, X_test, y_test, name='Decision Tree', ax=plt.gca())
+roc_display_rf = RocCurveDisplay.from_estimator(rf_model, X_test, y_test, name='Random Forest', ax=plt.gca())
+roc_display_svc = RocCurveDisplay.from_estimator(svm_model, X_test, y_test, name='Support Vector Machine', ax=plt.gca())
+
+plt.title('Receiver Operating Characteristic (ROC) Curve Comparison')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.plot([0, 1], [0, 1], 'k--', label='Random Guess')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+import ipywidgets as widgets
+from IPython.display import display, clear_output
+import pandas as pd
+import numpy as np
+
+# Define the feature names
+feature_names = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age']
+
+# Define the prediction function
+def predict_diabetes_with_button(**kwargs):
+    # Create a DataFrame from the input values
+    input_data = pd.DataFrame([list(kwargs.values())],
+                              columns=feature_names)
+
+    # Scale the input data using the previously fitted scaler
+    # Ensure 'scaler' object is available from previous steps
+    scaled_input_data = scaler.transform(input_data)
+
+    # Make a prediction using the Logistic Regression model
+    # Ensure 'log_reg_model' object is available from previous steps
+    prediction = log_reg_model.predict(scaled_input_data)
+
+    # Display the result
+    with output_widget:
+        clear_output(wait=True)
+        if prediction[0] == 1:
+            print("Prediction: Diabetes")
+        else:
+            print("Prediction: No Diabetes")
+
+# Create interactive widgets for each feature
+# Use descriptive statistics from `df.describe()` for appropriate ranges
+
+input_widgets = {
+    'Pregnancies': widgets.IntSlider(min=0, max=17, step=1, value=int(df['Pregnancies'].median()), description='Pregnancies'),
+    'Glucose': widgets.FloatSlider(min=df['Glucose'].min(), max=df['Glucose'].max(), step=1.0, value=df['Glucose'].median(), description='Glucose'),
+    'BloodPressure': widgets.FloatSlider(min=df['BloodPressure'].min(), max=df['BloodPressure'].max(), step=1.0, value=df['BloodPressure'].median(), description='BloodPressure'),
+    'SkinThickness': widgets.FloatSlider(min=df['SkinThickness'].min(), max=df['SkinThickness'].max(), step=1.0, value=df['SkinThickness'].median(), description='SkinThickness'),
+    'Insulin': widgets.FloatSlider(min=df['Insulin'].min(), max=df['Insulin'].max(), step=1.0, value=df['Insulin'].median(), description='Insulin'),
+    'BMI': widgets.FloatSlider(min=df['BMI'].min(), max=df['BMI'].max(), step=0.1, value=df['BMI'].median(), description='BMI'),
+    'DiabetesPedigreeFunction': widgets.FloatSlider(min=df['DiabetesPedigreeFunction'].min(), max=df['DiabetesPedigreeFunction'].max(), step=0.001, value=df['DiabetesPedigreeFunction'].median(), description='DPF'),
+    'Age': widgets.IntSlider(min=df['Age'].min(), max=df['Age'].max(), step=1, value=int(df['Age'].median()), description='Age')
+}
+
+# Create a button widget
+predict_button = widgets.Button(description="Predict Diabetes")
+output_widget = widgets.Output()
+
+# Link the button to the prediction function
+def on_button_clicked(b):
+    predict_diabetes_with_button(**{name: widget.value for name, widget in input_widgets.items()})
+
+predict_button.on_click(on_button_clicked)
+
+# Arrange widgets
+vbox_widgets = widgets.VBox(list(input_widgets.values()))
+
+print("Interactive Diabetes Prediction Interface:")
+display(vbox_widgets, predict_button, output_widget)
