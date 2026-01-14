@@ -431,4 +431,4 @@ vbox_widgets = widgets.VBox(list(input_widgets.values()))
 print("Interactive Diabetes Prediction Interface:")
 display(vbox_widgets, predict_button, output_widget)
 
-kuyvsdbdchysdvcuisdcnsiyvdcsDbcyusgc8suhcsyudcsddddddsyibdcbfiusdnfikoabdviysdcoisbfysbcsj cyusavdswshvdc8uswbdhw duswbf  sbjdabvs huaivo
+kuyvsdbdchysdvcuisdcnsiyvdcsDbcyusgc8suhcsyudcsddddddsyibdcbfiusdnfikoabdviysdcoisbfysbcsj cyusavdswshvdc8uswbdhw du
