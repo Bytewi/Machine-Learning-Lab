@@ -42,4 +42,4 @@ print('Cumulative Explained Variance (2 components):', pca.explained_variance_ra
 print('\nExplained Variance Ratio (1 component):')
 print(pca_one_component.explained_variance_ratio_)
 print('Cumulative Explained Variance (1 component):', pca_one_component.explained_variance_ratio_.sum())
-tsdvchsuysbysfnjrvyubfjebfuehrfuiwefiuerr ybs dfus fbasdfguvasiudfbwedu wriwwrw  fwgbyio
+tsdvchsuysbysfnjrvyubfjebfuehrfuiwefiuerr ybs dfus fbasdfguvasiudfbwed
